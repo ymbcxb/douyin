@@ -19,9 +19,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>tk.mybatis</groupId>
-            <artifactId>mapper</artifactId>
-            <version>3.5.3</version>
+            <groupId>top.ymbcxb</groupId>
+            <artifactId>douyin-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

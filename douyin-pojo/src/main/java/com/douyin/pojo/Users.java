@@ -1,20 +1,30 @@
 package com.douyin.pojo;
 
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@ApiModel(value = "用户对象",description = "这是用户对象")
 public class Users {
+    @ApiModelProperty(hidden = true)
     @Id
     private String id;
 
     /**
      * 用户名
      */
+    @ApiModelProperty(value = "用户名",name = "username")
     private String username;
 
     /**
      * 密码
      */
+//    @ApiModelProperty(value = "密码",name = "username")
     private String password;
 
     /**
