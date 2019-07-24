@@ -8,6 +8,10 @@ package com.douyin.common;
  */
 public class Const {
 
+    public final static String USER_PREFIX = "USER_PREFIX";
+
+    public final static String CURRENT_USER = "currentUser";
+
     public final static String COMMON_FILE = "properties/douyin-common.properties";//通用配置文件
 
     //通用码

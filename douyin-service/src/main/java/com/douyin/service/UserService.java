@@ -1,7 +1,7 @@
 package com.douyin.service;
 
 import com.douyin.common.ServerResponse;
-import com.douyin.pojo.Users;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author ymbcxb
@@ -14,4 +14,10 @@ public interface UserService {
     ServerResponse register(String username,String password);
 
     ServerResponse login(String username,String password);
+
+    ServerResponse logut(String userId);
+
+    ServerResponse uploadFace(String userId, MultipartFile file);
+
+    ServerResponse getUserInfo(String userId);
 }

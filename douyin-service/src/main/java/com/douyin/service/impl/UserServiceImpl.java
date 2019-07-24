@@ -5,14 +5,18 @@ import com.douyin.common.ServerResponse;
 import com.douyin.mapper.UsersMapper;
 import com.douyin.pojo.Users;
 import com.douyin.service.UserService;
+import com.douyin.utils.IdWorker;
 import com.douyin.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import sun.security.krb5.internal.PAData;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author ymbcxb
@@ -25,55 +29,123 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private IdWorker idWorker;
+    @Autowired
+    private RedisTemplate<String, Users> redisTemplate;
+    @Value("${uploadPath}")
+    private String uploadPath;
 
     @Override
-    public ServerResponse register(String username,String password){
+    public ServerResponse register(String username, String password) {
         //如果用户已经存在,则返回该用户已经存在
         ServerResponse checkUser = checkUser(username, password);
-        if(checkUser.success()){
-            return ServerResponse.createBySuccessMessage("该用户已存在");
+        if (checkUser.success()) {
+            return ServerResponse.createByErrorMessage("该用户已存在");
         }
         //3 保存用户,密码为MD5加密
         Users currentUser = new Users();
         currentUser.setPassword(MD5Util.MD5EncodeUtf8(password));
         currentUser.setUsername(username);
-        currentUser.setId(UUID.randomUUID().toString());
+        currentUser.setId(String.valueOf(idWorker.nextId()));
         currentUser.setNickname(username);
+        currentUser.setFansCounts(0);
+        currentUser.setFollowCounts(0);
+        currentUser.setReceiveLikeCounts(0);
         int resultCount = usersMapper.insertSelective(currentUser);
-        if(resultCount == 0){
+        if (resultCount == 0) {
             return ServerResponse.createByErrorMessage("注册失败");
         }
         currentUser.setPassword(null);
-        return ServerResponse.createBySuccessMessage("注册成功",currentUser);
+        return ServerResponse.createBySuccessMessage("注册成功");
     }
 
-    private ServerResponse checkUser(String username,String password){
+    private ServerResponse checkUser(String username, String password) {
         //1 判断用户名和密码是否为空
-        if(StringUtils.isBlank(username) || StringUtils.isBlank(password)){
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             return ServerResponse.createByErrorMessage("用户名和密码不为空");
         }
         //2 判断用户名是否存在
         Example userExample = new Example(Users.class);
         Example.Criteria criteria = userExample.createCriteria();
-        criteria.andEqualTo("username",username);
+        criteria.andEqualTo("username", username);
         Users user = usersMapper.selectOneByExample(userExample);
-        if( user != null){
+        if (user != null) {
             return ServerResponse.createBySuccess(user);
         }
         return ServerResponse.createByError();
     }
 
     @Override
-    public ServerResponse login(String username,String password){
+    public ServerResponse login(String username, String password) {
         //如果用户已存在则登陆
         ServerResponse checkUser = checkUser(username, password);
-        if(checkUser.success()){
+        if (checkUser.success()) {
             Users currentUser = (Users) checkUser.getData();
-            if(currentUser.getPassword().equals(MD5Util.MD5EncodeUtf8(password))) {
-                return ServerResponse.createBySuccessMessage("登陆成功");
+            if (currentUser.getPassword().equals(MD5Util.MD5EncodeUtf8(password))) {
+                currentUser.setPassword(null);
+                redisTemplate.opsForValue().set(Const.USER_PREFIX + currentUser.getId(), currentUser);
+                return ServerResponse.createBySuccessMessage("登陆成功", currentUser);
             }
-       }
-       return ServerResponse.createByErrorMessage("该用户名或者密码不正确");
+        }
+        return ServerResponse.createByErrorMessage("该用户名或者密码不正确");
     }
 
+    @Override
+    public ServerResponse logut(String userId) {
+        Users user = redisTemplate.opsForValue().get(Const.USER_PREFIX + userId);
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+        redisTemplate.delete(Const.USER_PREFIX + userId);
+        return ServerResponse.createBySuccessMessage("注销成功");
+    }
+
+    @Override
+    public ServerResponse uploadFace(String userId, MultipartFile multipartFile) {
+        if( userId == null){
+            return ServerResponse.createByErrorMessage("参数错误");
+        }
+        Boolean flag = redisTemplate.hasKey(Const.USER_PREFIX+userId);
+        if(!flag){
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        //上传文件
+        String fileName = multipartFile.getOriginalFilename();
+        String face_image = "/"+ userId + "/"+fileName;
+        String filePath =  uploadPath + face_image;
+        File f = new File(filePath);
+        if(!f.exists()){
+            File parent = new File(f.getParent());
+            parent.mkdirs();
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            multipartFile.transferTo(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("头像上传失败");
+        }
+        //保存进数据库
+        Users u = new Users();
+        u.setFaceImage(face_image);
+        Example userExample = new Example(Users.class);
+        Example.Criteria criteria = userExample.createCriteria();
+        criteria.andEqualTo("id",userId);
+        usersMapper.updateByExampleSelective(u,userExample);
+        return ServerResponse.createBySuccessMessage("头像上传成功",face_image);
+    }
+
+    @Override
+    public ServerResponse getUserInfo(String userId){
+        Users users = redisTemplate.opsForValue().get(Const.USER_PREFIX+userId);
+        if (users == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+        return ServerResponse.createBySuccess(users);
+    }
 }

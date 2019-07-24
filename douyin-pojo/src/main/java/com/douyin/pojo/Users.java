@@ -195,4 +195,18 @@ public class Users {
     public void setReceiveLikeCounts(Integer receiveLikeCounts) {
         this.receiveLikeCounts = receiveLikeCounts;
     }
+
+    @Override
+    public String toString() {
+        return "Users{" +
+                "id='" + id + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", faceImage='" + faceImage + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", fansCounts=" + fansCounts +
+                ", followCounts=" + followCounts +
+                ", receiveLikeCounts=" + receiveLikeCounts +
+                '}';
+    }
 }
