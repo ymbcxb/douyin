@@ -6,6 +6,7 @@ import com.douyin.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/user/")
-@Api(value = "用户的接口")
+@Api(value = "用户接口",tags = "用户接口")
 public class UserController {
 
     @Autowired
@@ -54,7 +55,7 @@ public class UserController {
      * @param
      * @return
      */
-    @ApiOperation(value = "用户登陆", notes = "用户接口")
+    @ApiOperation(value = "用户注销", notes = "用户接口")
     @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query")
     @PostMapping("logut")
     public ServerResponse logout(String userId) {
@@ -69,8 +70,9 @@ public class UserController {
      */
     @ApiOperation(value = "用户上传头像",notes = "用户上传头像的接口")
     @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query")
-    @PostMapping("uploadFace")
-    public ServerResponse uploadFace(String userId, @RequestParam("file")MultipartFile file){
+    @PostMapping(value = "uploadFace",headers = "content-type=multipart/form-data")
+    public ServerResponse uploadFace(String userId,
+                                     @ApiParam(name = "file",value = "上传的头像",required = true) @RequestParam(value = "file",required = true)MultipartFile file){
         return userService.uploadFace(userId,file);
     }
 

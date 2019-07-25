@@ -5,6 +5,7 @@ import com.douyin.common.ServerResponse;
 import com.douyin.mapper.UsersMapper;
 import com.douyin.pojo.Users;
 import com.douyin.service.UserService;
+import com.douyin.utils.FileUtil;
 import com.douyin.utils.IdWorker;
 import com.douyin.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
@@ -14,9 +15,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author ymbcxb
@@ -112,22 +110,10 @@ public class UserServiceImpl implements UserService {
         }
         //上传文件
         String fileName = multipartFile.getOriginalFilename();
-        String face_image = "/"+ userId + "/"+fileName;
+        String face_image = "/"+ userId + "/face/"+fileName;
         String filePath =  uploadPath + face_image;
-        File f = new File(filePath);
-        if(!f.exists()){
-            File parent = new File(f.getParent());
-            parent.mkdirs();
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            multipartFile.transferTo(f);
-        } catch (IOException e) {
-            e.printStackTrace();
+        boolean upload = FileUtil.upload(filePath, multipartFile);
+        if(!upload){
             return ServerResponse.createByErrorMessage("头像上传失败");
         }
         //保存进数据库
