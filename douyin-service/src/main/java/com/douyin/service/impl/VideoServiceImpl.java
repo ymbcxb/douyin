@@ -11,6 +11,10 @@ import com.douyin.service.VideoService;
 import com.douyin.utils.FFMpegUtil;
 import com.douyin.utils.FileUtil;
 import com.douyin.utils.IdWorker;
+import com.douyin.vo.VideosVo;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ymbcxb
@@ -68,7 +73,7 @@ public class VideoServiceImpl implements VideoService {
         String videoOutputPath = "";
         //合并bgm
         FFMpegUtil ffMpegUtil = new FFMpegUtil();
-        if(bgmId != null){
+        if(StringUtils.isBlank(bgmId)){
             //获取Bgm
             Bgm bgm = bgmMapper.selectByPrimaryKey(bgmId);
             String bgmPath = uploadPath+"/bgm"+bgm.getPath();
@@ -113,5 +118,13 @@ public class VideoServiceImpl implements VideoService {
         videos.setCreateTime(new Date());
         videosMapper.insert(videos);
         return videos;
+    }
+
+    @Override
+    public ServerResponse<PageInfo> videoList(Integer pageNum,Integer pageSize){
+        PageHelper.startPage(pageNum,pageSize);
+        List<VideosVo> videoList = videosMapper.selectAllVideos();
+        PageInfo pageInfo = new PageInfo(videoList);
+        return ServerResponse.createBySuccess(pageInfo);
     }
 }

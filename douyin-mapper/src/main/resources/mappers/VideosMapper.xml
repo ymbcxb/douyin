@@ -18,4 +18,35 @@
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
   </resultMap>
+
+  <resultMap id="VideosVoMap" type="com.douyin.vo.VideosVo" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="audio_id" property="audioId" jdbcType="VARCHAR" />
+    <result column="video_desc" property="videoDesc" jdbcType="VARCHAR" />
+    <result column="video_path" property="videoPath" jdbcType="VARCHAR" />
+    <result column="video_seconds" property="videoSeconds" jdbcType="REAL" />
+    <result column="video_width" property="videoWidth" jdbcType="INTEGER" />
+    <result column="video_height" property="videoHeight" jdbcType="INTEGER" />
+    <result column="cover_path" property="coverPath" jdbcType="VARCHAR" />
+    <result column="like_counts" property="likeCounts" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="nickname" property="nickName" jdbcType="VARCHAR" />
+    <result column="face_image" property="faceImg" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="VideosVo_Column_List" >
+    videos.id,user_id,audio_id,video_desc,video_path,video_seconds,video_width,video_height,cover_path,
+    like_counts,status,nickname,face_image
+  </sql>
+  <select id="selectAllVideos" resultMap="VideosVoMap">
+    SELECT 
+    <include refid="VideosVo_Column_List"/>
+    from videos left join users on videos.user_id = users.id
+    where status = 1
+    order by videos.create_time desc
+  </select>
 </mapper>

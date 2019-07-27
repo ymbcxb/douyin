@@ -40,4 +40,16 @@ public class VideoController {
                                  Integer videoHeight,String bgmId){
         return videoService.uploadVideo(bgmId,userId, file, videoDesc, videoSeconds, videoWidth,videoHeight);
     }
+
+
+    @ApiOperation(value = "查询所有视频",notes = "查询所有视频")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum",value = "页数", paramType = "form",dataType = "Integer"),
+            @ApiImplicitParam(name = "pageSize",value = "页大小",paramType = "form",dataType = "Integer"),
+    })
+    @PostMapping(value = "list")
+    public ServerResponse list(@RequestParam(value = "pageNum",defaultValue = "1") Integer pageNum,
+                               @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize) {
+        return videoService.videoList(pageNum, pageSize);
+    }
 }

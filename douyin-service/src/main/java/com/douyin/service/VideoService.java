@@ -1,6 +1,7 @@
 package com.douyin.service;
 
 import com.douyin.common.ServerResponse;
+import com.github.pagehelper.PageInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -14,4 +15,5 @@ public interface VideoService {
     ServerResponse uploadVideo(String BgmId,String userId, MultipartFile multipartFile, String videoDesc, Double videoSeconds,
                                Integer videoWidth, Integer videoHeight);
 
+    ServerResponse<PageInfo> videoList(Integer pageNum, Integer pageSize);
 }
