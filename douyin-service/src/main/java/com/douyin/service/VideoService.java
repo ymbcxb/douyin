@@ -15,5 +15,9 @@ public interface VideoService {
     ServerResponse uploadVideo(String BgmId,String userId, MultipartFile multipartFile, String videoDesc, Double videoSeconds,
                                Integer videoWidth, Integer videoHeight);
 
-    ServerResponse<PageInfo> videoList(Integer pageNum, Integer pageSize);
+    ServerResponse<PageInfo> videoList(Integer pageNum, Integer pageSize,String value);
+
+    ServerResponse getHot(Integer num);
+
+    ServerResponse search(String value);
 }

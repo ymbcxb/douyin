@@ -3,8 +3,10 @@ package com.douyin.service.impl;
 import com.douyin.common.Const;
 import com.douyin.common.ServerResponse;
 import com.douyin.mapper.BgmMapper;
+import com.douyin.mapper.SearchRecordsMapper;
 import com.douyin.mapper.VideosMapper;
 import com.douyin.pojo.Bgm;
+import com.douyin.pojo.SearchRecords;
 import com.douyin.pojo.Users;
 import com.douyin.pojo.Videos;
 import com.douyin.service.VideoService;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -45,6 +48,8 @@ public class VideoServiceImpl implements VideoService {
     private IdWorker idWorker;
     @Autowired
     private BgmMapper bgmMapper;
+    @Autowired
+    private SearchRecordsMapper searchRecordsMapper;
     @Value("${serverUrl}")
     private String serverUrl;
 
@@ -121,10 +126,27 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public ServerResponse<PageInfo> videoList(Integer pageNum,Integer pageSize){
+    public ServerResponse<PageInfo> videoList(Integer pageNum,Integer pageSize,String value){
         PageHelper.startPage(pageNum,pageSize);
-        List<VideosVo> videoList = videosMapper.selectAllVideos();
+        List<VideosVo> videoList = videosMapper.selectAllVideosByValue(value);
         PageInfo pageInfo = new PageInfo(videoList);
         return ServerResponse.createBySuccess(pageInfo);
+    }
+
+
+    @Override
+    public ServerResponse search(String value){
+        //1.记录搜索记录
+        SearchRecords record = new SearchRecords();
+        record.setId(String.valueOf(idWorker.nextId()));
+        record.setContent(value);
+        searchRecordsMapper.insert(record);
+        return ServerResponse.createBySuccess();
+    }
+
+    @Override
+    public ServerResponse getHot(@RequestParam(value = "num",defaultValue = "10") Integer num){
+        List<String> hotSearchRecord = searchRecordsMapper.getHotSearchRecord(num);
+        return ServerResponse.createBySuccess(hotSearchRecord);
     }
 }

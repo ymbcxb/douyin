@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface VideosMapper extends MyMapper<Videos> {
 
-    List<VideosVo> selectAllVideos();
+    List<VideosVo> selectAllVideosByValue(String value);
 
 }

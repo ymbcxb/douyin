@@ -42,11 +42,12 @@
     videos.id,user_id,audio_id,video_desc,video_path,video_seconds,video_width,video_height,cover_path,
     like_counts,status,nickname,face_image
   </sql>
-  <select id="selectAllVideos" resultMap="VideosVoMap">
+  <select id="selectAllVideosByValue" resultMap="VideosVoMap">
     SELECT 
     <include refid="VideosVo_Column_List"/>
     from videos left join users on videos.user_id = users.id
     where status = 1
+    and videos.video_desc like "%"#{value}"%"
     order by videos.create_time desc
   </select>
 </mapper>

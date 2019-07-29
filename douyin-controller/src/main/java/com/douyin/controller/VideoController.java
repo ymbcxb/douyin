@@ -46,10 +46,31 @@ public class VideoController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum",value = "页数", paramType = "form",dataType = "Integer"),
             @ApiImplicitParam(name = "pageSize",value = "页大小",paramType = "form",dataType = "Integer"),
+            @ApiImplicitParam(name = "value",value = "根据某个值",paramType = "form",dataType = "String"),
     })
     @PostMapping(value = "list")
     public ServerResponse list(@RequestParam(value = "pageNum",defaultValue = "1") Integer pageNum,
-                               @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize) {
-        return videoService.videoList(pageNum, pageSize);
+                               @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize,
+                               String value) {
+        return videoService.videoList(pageNum, pageSize,value);
+    }
+
+    @ApiOperation(value = "根据关键字搜索视频",notes = "根据关键字搜索视频")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "value",value = "关键字", paramType = "form",dataType = "String")})
+    @PostMapping(value="search")
+    public ServerResponse search(String value){
+        return videoService.search(value);
+    }
+
+    /**
+     * 获取热点记录
+     * @return
+     */
+    @ApiOperation(value = "获取热点记录",notes = "获取热点记录")
+    @ApiImplicitParam(name = "num",value = "条数", paramType = "query",dataType = "Integer")
+    @PostMapping(value="hot")
+    public ServerResponse hot(Integer num){
+        return videoService.getHot(num);
     }
 }
