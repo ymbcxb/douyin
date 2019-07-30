@@ -73,4 +73,18 @@ public class VideoController {
     public ServerResponse hot(Integer num){
         return videoService.getHot(num);
     }
+
+
+    @ApiOperation(value = "喜欢或者不喜欢该视频",notes = "喜欢或者不喜欢视频")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId",value = "用户Id", paramType = "query",dataType = "String"),
+            @ApiImplicitParam(name = "videoId",value = "视频Id", paramType = "query",dataType = "String"),
+            @ApiImplicitParam(name = "videoCreaterId",value = "创建视频用户Id", paramType = "query",dataType = "String"),
+            @ApiImplicitParam(name = "likeFlag",value = "喜欢是否,1为喜欢，0为不喜欢", paramType = "query",dataType = "Integer")
+        }
+    )
+    @PostMapping("likeVideoOrNot")
+    public ServerResponse likeVideoOrNot(String userId, String videoId, String videoCreaterId,Integer likeFlag){
+        return videoService.likeVideoOrNot(userId,videoId,videoCreaterId,likeFlag);
+    }
 }

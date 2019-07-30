@@ -2,13 +2,8 @@ package com.douyin.service.impl;
 
 import com.douyin.common.Const;
 import com.douyin.common.ServerResponse;
-import com.douyin.mapper.BgmMapper;
-import com.douyin.mapper.SearchRecordsMapper;
-import com.douyin.mapper.VideosMapper;
-import com.douyin.pojo.Bgm;
-import com.douyin.pojo.SearchRecords;
-import com.douyin.pojo.Users;
-import com.douyin.pojo.Videos;
+import com.douyin.mapper.*;
+import com.douyin.pojo.*;
 import com.douyin.service.VideoService;
 import com.douyin.utils.FFMpegUtil;
 import com.douyin.utils.FileUtil;
@@ -23,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -50,6 +44,10 @@ public class VideoServiceImpl implements VideoService {
     private BgmMapper bgmMapper;
     @Autowired
     private SearchRecordsMapper searchRecordsMapper;
+    @Autowired
+    private UsersLikeVideosMapper usersLikeVideosMapper;
+    @Autowired
+    private UsersMapper usersMapper;
     @Value("${serverUrl}")
     private String serverUrl;
 
@@ -145,8 +143,32 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public ServerResponse getHot(@RequestParam(value = "num",defaultValue = "10") Integer num){
+    public ServerResponse getHot(Integer num){
         List<String> hotSearchRecord = searchRecordsMapper.getHotSearchRecord(num);
         return ServerResponse.createBySuccess(hotSearchRecord);
+    }
+
+    @Override
+    public ServerResponse likeVideoOrNot(String userId, String videoId, String videoCreaterId,Integer likeFlag){
+        //添加UserLikeVideos表
+        UsersLikeVideos record = new UsersLikeVideos();
+        record.setId(String.valueOf(idWorker.nextId()));
+        record.setUserId(userId);
+        record.setVideoId(videoId);
+        if(likeFlag == -1){
+           usersLikeVideosMapper.deleteByUserIdAndVideoId(userId,videoId);
+        }else{
+            usersLikeVideosMapper.insert(record);
+        }
+        //修改视频表
+        Videos videos = videosMapper.selectByPrimaryKey(videoId);
+        videos.setLikeCounts(videos.getLikeCounts()+likeFlag);
+        videosMapper.updateByPrimaryKeySelective(videos);
+        //修改发送者的用户表
+        Users users = usersMapper.selectByPrimaryKey(videoCreaterId);
+        users.setFollowCounts(users.getFansCounts()+likeFlag);
+        users.setId(String.valueOf(idWorker.nextId()));
+        usersMapper.updateByPrimaryKey(users);
+        return ServerResponse.createBySuccess();
     }
 }

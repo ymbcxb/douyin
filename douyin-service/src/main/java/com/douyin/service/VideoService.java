@@ -20,4 +20,6 @@ public interface VideoService {
     ServerResponse getHot(Integer num);
 
     ServerResponse search(String value);
+
+    ServerResponse likeVideoOrNot(String userId, String videoId, String videoCreaterId,Integer likeFlag);
 }
