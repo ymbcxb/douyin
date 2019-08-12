@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -164,11 +165,28 @@ public class VideoServiceImpl implements VideoService {
         Videos videos = videosMapper.selectByPrimaryKey(videoId);
         videos.setLikeCounts(videos.getLikeCounts()+likeFlag);
         videosMapper.updateByPrimaryKeySelective(videos);
-        //修改发送者的用户表
+        //修改视频创建者的用户表
         Users users = usersMapper.selectByPrimaryKey(videoCreaterId);
-        users.setFollowCounts(users.getFansCounts()+likeFlag);
-        users.setId(String.valueOf(idWorker.nextId()));
-        usersMapper.updateByPrimaryKey(users);
+        users.setReceiveLikeCounts(users.getReceiveLikeCounts()+likeFlag);
+        usersMapper.updateByPrimaryKeySelective(users);
+        if(redisTemplate.opsForValue().get(Const.USER_PREFIX+videoCreaterId) != null){
+            redisTemplate.delete(Const.USER_PREFIX+videoCreaterId);
+        }
+        //删除redis
+        redisTemplate.delete(Const.USER_PREFIX+videoCreaterId);
         return ServerResponse.createBySuccess();
+    }
+
+    @Override
+    public ServerResponse likeVideo(String userId,String videoId){
+        Example example = new Example(UsersLikeVideos.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("userId",userId);
+        criteria.andEqualTo("videoId",videoId);
+        UsersLikeVideos one = usersLikeVideosMapper.selectOneByExample(example);
+        if(one == null){
+            return ServerResponse.createByError(false);
+        }
+        return ServerResponse.createBySuccess(true);
     }
 }

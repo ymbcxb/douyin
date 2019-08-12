@@ -20,4 +20,7 @@ public interface UserService {
     ServerResponse uploadFace(String userId, MultipartFile file);
 
     ServerResponse getUserInfo(String userId);
+
+    ServerResponse follow(String userId,String fanId);
+
 }

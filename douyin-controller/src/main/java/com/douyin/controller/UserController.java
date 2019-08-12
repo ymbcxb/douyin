@@ -3,10 +3,7 @@ package com.douyin.controller;
 import com.douyin.common.ServerResponse;
 import com.douyin.pojo.Users;
 import com.douyin.service.UserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,7 +81,7 @@ public class UserController {
      * @param userId
      * @return
      */
-    @ApiOperation(value = "获取用户信息",notes = "用户上传头像的接口")
+    @ApiOperation(value = "获取用户信息",notes = "获取用户信息")
     @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query")
     @PostMapping("getUserInfo")
     public ServerResponse getUserInfo(String userId){
@@ -92,4 +89,18 @@ public class UserController {
     }
 
 
+    /**
+     * 互相关注
+     * @param userId
+     * @param fanId
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "fanId", value = "粉丝Id", required = true, dataType = "String", paramType = "query")
+    })
+    @PostMapping
+    public ServerResponse follow(String userId,String fanId){
+        return userService.follow(userId,fanId);
+    }
 }

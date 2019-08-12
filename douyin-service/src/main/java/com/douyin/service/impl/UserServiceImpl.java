@@ -2,8 +2,10 @@ package com.douyin.service.impl;
 
 import com.douyin.common.Const;
 import com.douyin.common.ServerResponse;
+import com.douyin.mapper.UsersFansMapper;
 import com.douyin.mapper.UsersMapper;
 import com.douyin.pojo.Users;
+import com.douyin.pojo.UsersFans;
 import com.douyin.service.UserService;
 import com.douyin.utils.FileUtil;
 import com.douyin.utils.IdWorker;
@@ -25,6 +27,8 @@ import tk.mybatis.mapper.entity.Example;
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Autowired
+    private UsersFansMapper usersFansMapper;
     @Autowired
     private UsersMapper usersMapper;
     @Autowired
@@ -123,6 +127,8 @@ public class UserServiceImpl implements UserService {
         Example.Criteria criteria = userExample.createCriteria();
         criteria.andEqualTo("id",userId);
         usersMapper.updateByExampleSelective(u,userExample);
+        //删除redis
+        redisTemplate.delete(Const.USER_PREFIX+userId);
         return ServerResponse.createBySuccessMessage("头像上传成功",face_image);
     }
 
@@ -130,8 +136,30 @@ public class UserServiceImpl implements UserService {
     public ServerResponse getUserInfo(String userId){
         Users users = redisTemplate.opsForValue().get(Const.USER_PREFIX+userId);
         if (users == null){
-            return ServerResponse.createByErrorMessage("用户未登录");
+            Users newUser = usersMapper.selectByPrimaryKey(userId);
+            users = newUser;
+            if(newUser == null){
+                return ServerResponse.createByErrorMessage("用户未登录");
+            }
+            else{
+                redisTemplate.opsForValue().set(Const.USER_PREFIX+userId,newUser);
+            }
         }
         return ServerResponse.createBySuccess(users);
+    }
+
+    @Override
+    public ServerResponse follow(String userId,String fanId){
+        if(StringUtils.isBlank(userId) || StringUtils.isBlank(fanId)){
+            return ServerResponse.createByErrorMessage("参数错误");
+        }
+        UsersFans usersFans = new UsersFans();
+        usersFans.setFanId(fanId);
+        usersFans.setUserId(userId);
+        int count = usersFansMapper.insert(usersFans);
+        if(count <= 0){
+            return ServerResponse.createByErrorMessage("关注失败");
+        }
+        return ServerResponse.createBySuccessMessage("关注成功");
     }
 }

@@ -22,4 +22,6 @@ public interface VideoService {
     ServerResponse search(String value);
 
     ServerResponse likeVideoOrNot(String userId, String videoId, String videoCreaterId,Integer likeFlag);
+
+    ServerResponse likeVideo(String userId,String videoId);
 }
