@@ -14,4 +14,10 @@
     <result column="follow_counts" property="followCounts" jdbcType="INTEGER" />
     <result column="receive_like_counts" property="receiveLikeCounts" jdbcType="INTEGER" />
   </resultMap>
+
+  <select id="findFollowuserByUserId" resultMap="BaseResultMap" parameterType="string">
+    SELECT u.*
+    FROM users_fans left join users as u
+    on fan_id = u.id
+  </select>
 </mapper>

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.List;
+
 /**
  * @author ymbcxb
  * @title
@@ -161,5 +163,11 @@ public class UserServiceImpl implements UserService {
             return ServerResponse.createByErrorMessage("关注失败");
         }
         return ServerResponse.createBySuccessMessage("关注成功");
+    }
+
+    @Override
+    public ServerResponse followList(String userId){
+        List<Users> users = usersMapper.findFollowuserByUserId(userId);
+        return ServerResponse.createBySuccess(users);
     }
 }

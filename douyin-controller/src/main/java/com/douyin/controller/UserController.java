@@ -3,6 +3,7 @@ package com.douyin.controller;
 import com.douyin.common.ServerResponse;
 import com.douyin.pojo.Users;
 import com.douyin.service.UserService;
+import com.douyin.service.VideoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private VideoService videoService;
 
     /**
      * 注册
@@ -102,5 +105,28 @@ public class UserController {
     @PostMapping
     public ServerResponse follow(String userId,String fanId){
         return userService.follow(userId,fanId);
+    }
+
+    /**
+     * 根据类型获取用户信息
+     * @param userId
+     * @param type
+     * @return
+     */
+    @GetMapping("userInfo")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "type", value = "类型", required = true, dataType = "String", paramType = "query")
+    })
+    public ServerResponse getUserByType(String userId,String type){
+        ServerResponse rs = new ServerResponse();
+        if("video".equals(type)){
+            rs = videoService.videoList(userId);
+        }else if("collection".equals(type)){
+            rs = videoService.videoLikeList(userId);
+        }else if("follow".equals(type)){
+            rs = userService.followList(userId);
+        }
+        return rs;
     }
 }

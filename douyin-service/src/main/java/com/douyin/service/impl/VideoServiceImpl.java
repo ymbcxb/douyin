@@ -189,4 +189,22 @@ public class VideoServiceImpl implements VideoService {
         }
         return ServerResponse.createBySuccess(true);
     }
+
+    @Override
+    public ServerResponse videoList(String userId){
+        Example example = new Example(Videos.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("userId",userId);
+        List<Videos> videos = videosMapper.selectByExample(example);
+        return ServerResponse.createBySuccess(videos);
+    }
+
+    @Override
+    public ServerResponse videoLikeList(String userId){
+        Example example = new Example(UsersLikeVideos.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("userId",userId);
+        List<UsersLikeVideos> likeVideos = usersLikeVideosMapper.selectByExample(example);
+        return ServerResponse.createBySuccess(likeVideos);
+    }
 }

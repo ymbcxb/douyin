@@ -23,4 +23,6 @@ public interface UserService {
 
     ServerResponse follow(String userId,String fanId);
 
+    ServerResponse followList(String userId);
+
 }
