@@ -102,9 +102,9 @@ public class UserController {
             @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "fanId", value = "粉丝Id", required = true, dataType = "String", paramType = "query")
     })
-    @PostMapping
-    public ServerResponse follow(String userId,String fanId){
-        return userService.follow(userId,fanId);
+    @PostMapping("/follow")
+    public ServerResponse follow(String userId,String fanId,Integer type){
+        return userService.follow(userId,fanId,type);
     }
 
     /**
@@ -129,4 +129,14 @@ public class UserController {
         }
         return rs;
     }
+
+    @GetMapping("userFollowStatus")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "fanId", value = "粉丝Id", required = true, dataType = "String", paramType = "query")
+    })
+    public ServerResponse userFollowStatus(String userId,String fanId){
+        return userService.userStatus(userId,fanId);
+    }
+
 }

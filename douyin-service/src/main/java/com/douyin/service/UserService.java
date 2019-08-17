@@ -21,8 +21,10 @@ public interface UserService {
 
     ServerResponse getUserInfo(String userId);
 
-    ServerResponse follow(String userId,String fanId);
+    ServerResponse follow(String userId,String fanId,Integer type);
 
     ServerResponse followList(String userId);
+
+    ServerResponse userStatus(String userId,String fanId);
 
 }

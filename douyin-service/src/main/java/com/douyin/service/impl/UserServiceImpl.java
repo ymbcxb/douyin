@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
@@ -151,23 +152,58 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ServerResponse follow(String userId,String fanId){
+    public ServerResponse follow(String userId,String fanId,Integer type){
         if(StringUtils.isBlank(userId) || StringUtils.isBlank(fanId)){
             return ServerResponse.createByErrorMessage("参数错误");
         }
         UsersFans usersFans = new UsersFans();
         usersFans.setFanId(fanId);
         usersFans.setUserId(userId);
-        int count = usersFansMapper.insert(usersFans);
-        if(count <= 0){
-            return ServerResponse.createByErrorMessage("关注失败");
+        String uid = String.valueOf(idWorker.nextId());
+        if(type == 1){
+            usersFans.setId(String.valueOf(uid));
+            int count = usersFansMapper.insert(usersFans);
+            if(count <= 0){
+                return ServerResponse.createByErrorMessage("关注失败");
+            }
+        }else{
+            int count = usersFansMapper.delete(usersFans);
+            if(count <= 0){
+                return ServerResponse.createByErrorMessage("关注失败");
+            }
         }
+        updateUserFollowByUserId(userId,fanId,type);
         return ServerResponse.createBySuccessMessage("关注成功");
+    }
+
+    @Transactional
+    public void updateUserFollowByUserId(String userId,String fanId,Integer type){
+        Users userOne = usersMapper.selectByPrimaryKey(userId);
+        Users userFan = usersMapper.selectByPrimaryKey(fanId);
+        userOne.setFansCounts(userOne.getFansCounts()+type);
+        usersMapper.updateByPrimaryKeySelective(userOne);
+        userFan.setFollowCounts(userFan.getFollowCounts()+type);
+        usersMapper.updateByPrimaryKeySelective(userFan);
+        redisTemplate.delete(Const.USER_PREFIX+userId);
+        redisTemplate.delete(Const.USER_PREFIX+fanId);
     }
 
     @Override
     public ServerResponse followList(String userId){
         List<Users> users = usersMapper.findFollowuserByUserId(userId);
         return ServerResponse.createBySuccess(users);
+    }
+
+    @Override
+    public ServerResponse userStatus(String userId,String fanId){
+        Example example = new Example(UsersFans.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("userId",userId);
+        criteria.andEqualTo("fanId",fanId);
+        int count = usersFansMapper.selectCountByExample(example);
+        if(count > 0){
+            return ServerResponse.createBySuccess(true);
+        }
+        return ServerResponse.createByError(false);
     }
 }

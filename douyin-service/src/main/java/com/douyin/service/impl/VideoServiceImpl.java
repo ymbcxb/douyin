@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
@@ -183,8 +184,8 @@ public class VideoServiceImpl implements VideoService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId",userId);
         criteria.andEqualTo("videoId",videoId);
-        UsersLikeVideos one = usersLikeVideosMapper.selectOneByExample(example);
-        if(one == null){
+        List<UsersLikeVideos> one = usersLikeVideosMapper.selectByExample(example);
+        if(one == null || CollectionUtils.isEmpty(one)){
             return ServerResponse.createByError(false);
         }
         return ServerResponse.createBySuccess(true);
