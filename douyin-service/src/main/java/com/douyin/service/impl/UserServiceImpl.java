@@ -2,8 +2,10 @@ package com.douyin.service.impl;
 
 import com.douyin.common.Const;
 import com.douyin.common.ServerResponse;
+import com.douyin.mapper.CommentsMapper;
 import com.douyin.mapper.UsersFansMapper;
 import com.douyin.mapper.UsersMapper;
+import com.douyin.pojo.Comments;
 import com.douyin.pojo.Users;
 import com.douyin.pojo.UsersFans;
 import com.douyin.service.UserService;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,6 +41,8 @@ public class UserServiceImpl implements UserService {
     private IdWorker idWorker;
     @Autowired
     private RedisTemplate<String, Users> redisTemplate;
+    @Autowired
+    private CommentsMapper commentsMapper;
     @Value("${uploadPath}")
     private String uploadPath;
 
@@ -205,5 +210,16 @@ public class UserServiceImpl implements UserService {
             return ServerResponse.createBySuccess(true);
         }
         return ServerResponse.createByError(false);
+    }
+
+    @Override
+    public ServerResponse addComment(Comments comments){
+        comments.setId(String.valueOf(idWorker.nextId()));
+        comments.setCreateTime(new Date());
+        int resultCount = commentsMapper.insert(comments);
+        if(resultCount > 0){
+            return ServerResponse.createByError();
+        }
+        return ServerResponse.createBySuccess();
     }
 }

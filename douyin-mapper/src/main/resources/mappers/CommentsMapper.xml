@@ -13,4 +13,23 @@
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="comment" property="comment" jdbcType="LONGVARCHAR" />
   </resultMap>
+
+  <resultMap id="CommentsVoMap" type="com.douyin.vo.CommentsVo">
+    <result column="id" property="id"/>
+    <result column="from_user_id" property="fromUserId"/>
+    <result column="face_image" property="faceImg"/>
+    <result column="nickname" property="nickName"/>
+    <result column="comment" property="comment"/>
+    <result column="create_time" property="timeAgoStr" typeHandler="com.douyin.handler.TimeAgoHandler"/>
+    <result column="toNickname" property="toNickname"/>
+  </resultMap>
+
+  <select id="selectCommentsVoList" parameterType="string" resultMap="CommentsVoMap">
+   SELECT c.id,c.from_user_id,c.`comment`,c.create_time,u.face_image,u.nickname,u2.nickname as toNickname  FROM
+    `comments` as c
+    left JOIN users as u ON c.from_user_id = u.id
+    left JOIN users as u2 ON c.to_user_id = u.id
+    where c.video_id = #{videoId}
+    ORDER BY create_time DESC
+  </select>
 </mapper>

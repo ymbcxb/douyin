@@ -1,6 +1,7 @@
 package com.douyin.controller;
 
 import com.douyin.common.ServerResponse;
+import com.douyin.pojo.Comments;
 import com.douyin.pojo.Users;
 import com.douyin.service.UserService;
 import com.douyin.service.VideoService;
@@ -98,6 +99,7 @@ public class UserController {
      * @param fanId
      * @return
      */
+    @ApiOperation(value = "互相关注",notes = "互相关注")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "fanId", value = "粉丝Id", required = true, dataType = "String", paramType = "query")
@@ -113,6 +115,7 @@ public class UserController {
      * @param type
      * @return
      */
+    @ApiOperation(value = "获取用户信息",notes = "获取用户信息")
     @GetMapping("userInfo")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
@@ -130,6 +133,7 @@ public class UserController {
         return rs;
     }
 
+    @ApiOperation(value = "更新用户状态",notes = "更新用户状态")
     @GetMapping("userFollowStatus")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
@@ -139,4 +143,14 @@ public class UserController {
         return userService.userStatus(userId,fanId);
     }
 
+
+    @ApiOperation(value = "添加评论",notes = "添加评论")
+    @PostMapping("addComment")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户Id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "comment", value = "留言", required = true, dataType = "String", paramType = "query")
+    })
+    public ServerResponse addComment(@RequestBody Comments comments){
+        return userService.addComment(comments);
+    }
 }

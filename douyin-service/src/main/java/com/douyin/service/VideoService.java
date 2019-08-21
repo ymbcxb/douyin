@@ -28,4 +28,6 @@ public interface VideoService {
     ServerResponse videoList(String userId);
 
     ServerResponse videoLikeList(String userId);
+
+    ServerResponse commentsList(String videoId);
 }

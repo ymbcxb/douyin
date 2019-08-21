@@ -1,6 +1,7 @@
 package com.douyin.service;
 
 import com.douyin.common.ServerResponse;
+import com.douyin.pojo.Comments;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -27,4 +28,5 @@ public interface UserService {
 
     ServerResponse userStatus(String userId,String fanId);
 
+    ServerResponse addComment(Comments comments);
 }

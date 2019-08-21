@@ -8,6 +8,7 @@ import com.douyin.service.VideoService;
 import com.douyin.utils.FFMpegUtil;
 import com.douyin.utils.FileUtil;
 import com.douyin.utils.IdWorker;
+import com.douyin.vo.CommentsVo;
 import com.douyin.vo.VideosVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -50,6 +51,8 @@ public class VideoServiceImpl implements VideoService {
     private UsersLikeVideosMapper usersLikeVideosMapper;
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private CommentsMapper commentsMapper;
     @Value("${serverUrl}")
     private String serverUrl;
 
@@ -207,5 +210,11 @@ public class VideoServiceImpl implements VideoService {
         criteria.andEqualTo("userId",userId);
         List<UsersLikeVideos> likeVideos = usersLikeVideosMapper.selectByExample(example);
         return ServerResponse.createBySuccess(likeVideos);
+    }
+
+    @Override
+    public ServerResponse commentsList(String videoId){
+        List<CommentsVo> commentsVos = commentsMapper.selectCommentsVoList(videoId);
+        return ServerResponse.createBySuccess(commentsVos);
     }
 }

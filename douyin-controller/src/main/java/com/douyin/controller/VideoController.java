@@ -94,4 +94,11 @@ public class VideoController {
     public ServerResponse likeVideo(String userId,String videoId){
         return videoService.likeVideo(userId,videoId);
     }
+
+    @ApiOperation(value = "获取评论列表",notes = "获取评论列表")
+    @ApiImplicitParam(name = "videoId", value = "视频Id", paramType = "query", dataType = "String")
+    @GetMapping("comment_list")
+    public ServerResponse commentList(String videoId){
+        return videoService.commentsList(videoId);
+    }
 }
